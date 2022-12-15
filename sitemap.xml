@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://blog.life6585.com/categories/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/categories/devops/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/nginx/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/qos/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/sometimes-404/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/istio/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/wechat/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/weichat-callback-failure/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/k8s/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/swagger-ui-basic-auth/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/swaggerui/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/oauth2/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/oauth2-proxy/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/openresty/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/localimageserver/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/minio/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/thumbor/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/oauth/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/token/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/localstoragelost/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/hsts/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/public-wifi-notsecure/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/ssl/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/python/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/ssl-expire-check/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/ingress/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/ingress-snippet-not-work/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/categories/virtualization/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/alicloud/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/cdn/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/alicloud-cdn-offline/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/yapi/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/yapi-ssl/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/maven/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/patch-git-commit-id-plugin/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/shell/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/packer/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/packer-build-centos7-ami/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/istio-1.6-install/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/categories/application/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/github/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/hugo/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/posts/hugo-github-blog-deploy/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/tags/travis/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.life6585.com/about/</loc>
+    <lastmod>2022-12-15T06:34:08+00:00</lastmod>
+  </url>
+  
+</urlset>

@@ -1,0 +1,2641 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+
+
+
+
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>life6585&#39;s Blog</title>
+        <link>https://blog.life6585.com/</link>
+        <description>daily record.</description>
+        <generator>Hugo 0.72.0 https://gohugo.io/</generator>
+        
+            <language>en</language>
+        
+        
+            <managingEditor>life85@126.comm (life6585)</managingEditor>
+        
+        
+            <webMaster>life85@126.comm (life6585)</webMaster>
+        
+        
+            <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+        
+        <lastBuildDate>Thu, 15 Dec 2022 06:34:12 &#43;0000</lastBuildDate>
+        
+            <atom:link rel="self" type="application/rss&#43;xml" href="https://blog.life6585.com/rss.xml" />
+        
+        
+            <item>
+                <title>Sometimes 404</title>
+                <link>https://blog.life6585.com/posts/sometimes-404/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/sometimes-404/</guid>
+                <pubDate>Thu, 15 Dec 2022 14:22:55 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h2 id=&#34;现象&#34;&gt;现象&lt;/h2&gt;
+&lt;p&gt;nginx反向代理请求到阿里云oss,&lt;/p&gt;
+&lt;p&gt;静态资源请求小概率404&lt;/p&gt;
+&lt;p&gt;直接请求oss 静态资源 没问题&lt;/p&gt;
+&lt;h2 id=&#34;分析&#34;&gt;分析&lt;/h2&gt;
+&lt;ol start=&#34;0&#34;&gt;
+&lt;li&gt;错误日志&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;2022/12/15 02:52:10 [error] 44#44: *9122 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.162.129, server: , request: &amp;ldquo;GET /dist/bundle.1670.4b095fc535ccd1d37d6f.js HTTP/1.1&amp;rdquo;, upstream: &amp;ldquo;https://113.96.179.225:443/web-xzlzs/dist/bundle.1670.4b095fc535ccd1d37d6f.js&amp;rdquo;, host: &amp;ldquo;yxzl-test.yuexiuproperty.cn&amp;rdquo;, referrer: &amp;ldquo;&lt;a href=&#34;https://yxzl-test.yuexiuproperty.cn/?code=lhGGZ2vmuyTzOwpD4t6ToM4t1tOTyfn6&amp;amp;state=1671010519736%22&#34;&gt;https://yxzl-test.yuexiuproperty.cn/?code=lhGGZ2vmuyTzOwpD4t6ToM4t1tOTyfn6&amp;amp;state=1671010519736&amp;quot;&lt;/a&gt;
+2022/12/15 02:52:10 [error] 44#44: *9122 open() &amp;ldquo;/usr/share/nginx/html/50x.html&amp;rdquo; failed (2: No such file or directory), client: 172.18.162.129, server: , request: &amp;ldquo;GET /dist/bundle.1670.4b095fc535ccd1d37d6f.js HTTP/1.1&amp;rdquo;, upstream: &amp;ldquo;https://113.96.179.225:443/web-xzlzs/dist/bundle.1670.4b095fc535ccd1d37d6f.js&amp;rdquo;, host: &amp;ldquo;yxzl-test.yuexiuproperty.cn&amp;rdquo;, referrer: &amp;ldquo;&lt;a href=&#34;https://yxzl-test.yuexiuproperty.cn/?code=lhGGZ2vmuyTzOwpD4t6ToM4t1tOTyfn6&amp;amp;state=1671010519736%22&#34;&gt;https://yxzl-test.yuexiuproperty.cn/?code=lhGGZ2vmuyTzOwpD4t6ToM4t1tOTyfn6&amp;amp;state=1671010519736&amp;quot;&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;404 不是直接原因&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;反向代理请求 出现错误&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;不同的域名解析导致？ 多个cdn地址？&lt;/p&gt;
+&lt;p&gt;测试不是该原因&lt;/p&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;资源限制？&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;服务端 请求限制？&lt;/p&gt;
+&lt;p&gt;同样的镜像，本地跑起来测试正常，不是阿里云的限制&lt;/p&gt;
+&lt;p&gt;客户端&lt;/p&gt;
+&lt;p&gt;怀疑qos限制，去除cpu、内存限制正常&lt;/p&gt;
+&lt;p&gt;中间&lt;/p&gt;
+&lt;p&gt;未测试&lt;/p&gt;
+&lt;h2 id=&#34;解决&#34;&gt;解决&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;        resources:
+          limits:
+            cpu: &amp;quot;1&amp;quot;
+            memory: 1000Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;改成&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;        resources:
+          limits:
+            cpu: &amp;quot;1&amp;quot;
+            memory: 1000Mi
+          requests:
+            cpu: 100m
+            memory: 150Mi
+&lt;/code&gt;&lt;/pre&gt;</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/nginx/">nginx</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/qos/">qos</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>Weichat Callback Failure</title>
+                <link>https://blog.life6585.com/posts/weichat-callback-failure/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/weichat-callback-failure/</guid>
+                <pubDate>Wed, 07 Sep 2022 16:28:52 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h2 id=&#34;现象&#34;&gt;现象&lt;/h2&gt;
+&lt;p&gt;微信回调接口失败，curl、postman 正常&lt;/p&gt;
+&lt;h2 id=&#34;分析&#34;&gt;分析&lt;/h2&gt;
+&lt;p&gt;编辑istio configmap显示ingress-gateway 日志&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;kubectl edit configmap -n istio-system&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;增加&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;data:
+  mesh: |-
+    accessLogEncoding: JSON
+    accessLogFile: /dev/stdout
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;ingress-gateway 日志&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;downstream_remote_address&amp;quot;:&amp;quot;172.23.249.64:12982&amp;quot;,
+  &amp;quot;route_name&amp;quot;:null,
+  &amp;quot;bytes_received&amp;quot;:0,
+  &amp;quot;upstream_local_address&amp;quot;:null,
+  &amp;quot;bytes_sent&amp;quot;:0,
+  &amp;quot;duration&amp;quot;:0,
+  &amp;quot;response_flags&amp;quot;:&amp;quot;-&amp;quot;,
+  &amp;quot;protocol&amp;quot;:&amp;quot;HTTP/1.0&amp;quot;,
+  &amp;quot;downstream_local_address&amp;quot;:&amp;quot;172.23.141.49:8443&amp;quot;,
+  &amp;quot;upstream_service_time&amp;quot;:null,
+  &amp;quot;upstream_host&amp;quot;:null,
+  &amp;quot;request_id&amp;quot;:null,
+  &amp;quot;x_forwarded_for&amp;quot;:null,
+  &amp;quot;requested_server_name&amp;quot;:&amp;quot;base-app.creams.io&amp;quot;,
+  &amp;quot;start_time&amp;quot;:&amp;quot;2022-09-07T07:38:52.549Z&amp;quot;,
+  &amp;quot;authority&amp;quot;:&amp;quot;base-app.creams.io&amp;quot;,
+  &amp;quot;path&amp;quot;:&amp;quot;/api/wechat-bridge/event/callback?signature=89e1e32c0d51d3834754a70b67fd878354724e93&amp;amp;echostr=5512910522763997071&amp;amp;timestamp=1662536332&amp;amp;nonce=790690840&amp;quot;,
+  &amp;quot;response_code&amp;quot;:426,
+  &amp;quot;upstream_transport_failure_reason&amp;quot;:null,
+  &amp;quot;method&amp;quot;:&amp;quot;GET&amp;quot;,
+  &amp;quot;upstream_cluster&amp;quot;:null,
+  &amp;quot;connection_termination_details&amp;quot;:null,
+  &amp;quot;user_agent&amp;quot;:&amp;quot;Mozilla/4.0&amp;quot;,
+  &amp;quot;response_code_details&amp;quot;:&amp;quot;low_version&amp;quot;
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;通过日志可以知道是因为微信回调的时候使用HTTP1.0 ，istio默认不支持导致&lt;/p&gt;
+&lt;h2 id=&#34;解决&#34;&gt;解决&lt;/h2&gt;
+&lt;p&gt;通过环境变量，设置istio envoy 支持http1.0&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;kubectl edit deploy -n istio-system 
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;增加环境变量 PILOT_HTTP10 为 1。&lt;/p&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://xie.infoq.cn/article/9fd56ee9a0a8f177394d9b9d9&#34;&gt;https://xie.infoq.cn/article/9fd56ee9a0a8f177394d9b9d9&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://makeoptim.com/istio-faq/istio-support-http10#:~:text=Istio%20%E9%BB%98%E8%AE%A4%E5%8F%AA%E6%94%AF%E6%8C%81HTTP,%E5%B9%B6%E4%B8%8D%E6%94%AF%E6%8C%81HTTP%2F1.0%E3%80%82&#34;&gt;https://makeoptim.com/istio-faq/istio-support-http10#:~:text=Istio%20%E9%BB%98%E8%AE%A4%E5%8F%AA%E6%94%AF%E6%8C%81HTTP,%E5%B9%B6%E4%B8%8D%E6%94%AF%E6%8C%81HTTP%2F1.0%E3%80%82&lt;/a&gt;&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/istio/">istio</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/wechat/">wechat</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>Swagger Ui Basic Auth</title>
+                <link>https://blog.life6585.com/posts/swagger-ui-basic-auth/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/swagger-ui-basic-auth/</guid>
+                <pubDate>Wed, 27 Jul 2022 10:44:21 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h2 id=&#34;创建password文件&#34;&gt;创建password文件&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;htpasswd -c /tmp/password username
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;修改deploymentyaml-通过lifecycle增加认证&#34;&gt;修改deployment.yaml ，通过lifecycle增加认证&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;        lifecycle:
+          postStart:
+            exec:
+              command: [&amp;quot;/bin/sh&amp;quot;, &amp;quot;-c&amp;quot;, &#39;echo username:password &amp;gt; /etc/nginx/.htpasswd;sed -i &amp;quot;/sendfile/a\  auth_basic_user_file /etc/nginx/.htpasswd;&amp;quot; /etc/nginx/nginx.conf;sed -i &amp;quot;/sendfile/a\  auth_basic \&amp;quot;Restricted Content\&amp;quot;;&amp;quot; /etc/nginx/nginx.conf&#39;]
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;username:password 替换成真实数据，密码中如果包含$等特殊字符，需要\ 转义&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/swaggerui/">swaggerui</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/k8s/">k8s</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>Oauth2 Proxy</title>
+                <link>https://blog.life6585.com/posts/oauth2-proxy/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/oauth2-proxy/</guid>
+                <pubDate>Fri, 18 Feb 2022 16:09:35 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;p&gt;book.test.io实现oauth鉴权&lt;/p&gt;
+&lt;p&gt;通过cookie中的自定义cookie TESTAccessToken鉴权，&lt;/p&gt;
+&lt;p&gt;鉴权失败，跳转登录页面，登录成功把access_token设置到cookie TESTAccessToken&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;opm install ledgetech/lua-resty-http
+&lt;/code&gt;&lt;/pre&gt;&lt;pre&gt;&lt;code&gt;#nginx.conf
+
+resolver 114.114.114.114;
+lua_ssl_verify_depth 10;
+lua_ssl_trusted_certificate &#39;/etc/ssl/certs/ca-certificates.crt&#39;;
+
+init_by_lua_block {
+    require(&#39;oauth2&#39;).init({
+        code_endpoint = &#39;https://accounts.test.io/oauth/authorize&#39;,
+        token_endpoint = &#39;https://accounts.test.io/oauth/token&#39;,
+        validate_endpoint = &#39;https://accounts.test.io/users/info/me&#39;,
+        redirect_uri = &#39;https://book.test.io/oauth2/callback&#39;,
+        start_uri = &#39;https://book.test.io/&#39;,
+        client_id = &#39;client_id&#39;,
+        client_secret = &#39;secret&#39;,
+        scope = &#39;TEST&#39;,
+        response_type = &#39;code&#39;,
+    })
+}
+
+server {
+    listen 80;
+
+    location = /validate {
+        content_by_lua_block {
+            local access_token = ngx.var.cookie_TESTAccessToken
+            if access_token then
+                local resp_status_code = require(&#39;oauth2&#39;).validate(access_token)
+                ngx.log(ngx.ERR,resp_status_code)
+                if  resp_status_code == 200 then
+                    ngx.exit(ngx.HTTP_OK)
+                else
+                    ngx.exit(ngx.HTTP_UNAUTHORIZED)
+                end
+            else
+                ngx.exit(ngx.HTTP_UNAUTHORIZED)
+            end
+
+        }
+    }
+
+    location @error401 {
+        content_by_lua_block {
+            return require(&#39;oauth2&#39;).get_code()
+        }
+    }
+
+    location / {
+        auth_request /validate;
+        proxy_pass http://pro-gitbook-service:4000;
+        error_page 401 = @error401;
+    }
+
+    location /oauth2/callback {
+        content_by_lua_block {
+        return require(&#39;oauth2&#39;).set_cookie(ngx.var.arg_code)
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;30
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;31
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;32
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;33
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;34
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;35
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;36
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;37
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;38
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;39
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;40
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;41
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;42
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;43
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;44
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;45
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;46
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;47
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;48
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;49
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;50
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;51
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;52
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;53
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;54
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;55
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;56
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;57
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;58
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;59
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;60
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;61
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;62
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;63
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;64
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;65
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;66
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;67
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;68
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;69
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;70
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;71
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;72
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;73
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;74
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;75
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;76
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;77
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;78
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;79
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;80
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;81
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;82
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;83
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;84
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;85
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;86
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;87
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;88
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;89
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;90
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;91
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-lua&#34; data-lang=&#34;lua&#34;&gt;&lt;span class=&#34;o&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;oauth.lua&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;-- resty/lua/oauth2.lua&lt;/span&gt;
+
+&lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cjson&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;require&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;cjson.safe&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;cjson.encode_empty_table_as_object&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kc&#34;&gt;false&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;http&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;require&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;resty.http&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;M&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{}&lt;/span&gt;
+&lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_conf&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;nil&lt;/span&gt;
+
+&lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;code_url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+  &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;params&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ngx.encode_args&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;({&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;client_id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_conf.client_id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;redirect_uri&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_conf.redirect_uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;scope&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_conf.scope&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;response_type&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_conf.response_type&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+  &lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+  &lt;span class=&#34;kr&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_conf.code_endpoint&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;..&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;?&amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;..&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;params&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+
+
+&lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;get_token&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;code&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;params&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ngx.encode_args&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;({&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;code&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;code&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;client_id&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_conf.client_id&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;client_secret&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_conf.client_secret&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;grant_type&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;authorization_code&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;redirect_uri&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_conf.redirect_uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+      &lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;httpc&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;http.new&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;res&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;err&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;httpc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;request_uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_conf.token_endpoint&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;method&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;headers&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;application/x-www-form-urlencoded&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;},&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;body&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;params&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+
+    &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;not&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;res&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;ngx.log&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ngx.ERR&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;request failed: &amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;err&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;return&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;status&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;res.status&lt;/span&gt;
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;length&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;res.headers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Content-Length&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;body&lt;/span&gt;   &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;res.body&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cjson.decode&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;body&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)[&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;access_token&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+
+
+&lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;M&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;validate&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;token&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;httpc&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;http.new&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;res&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;err&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;httpc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;request_uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_conf.validate_endpoint&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;method&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;GET&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;headers&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;application/json&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+            &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Authorization&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;Bearer &amp;#39;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;..&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;token&lt;/span&gt;
+        &lt;span class=&#34;p&#34;&gt;},&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;})&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;not&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;res&lt;/span&gt; &lt;span class=&#34;kr&#34;&gt;then&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;ngx.log&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ngx.ERR&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;request failed: &amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;err&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+        &lt;span class=&#34;kr&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;401&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+
+
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;status&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;res.status&lt;/span&gt;
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;length&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;res.headers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Content-Length&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;body&lt;/span&gt;   &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;res.body&lt;/span&gt;
+    &lt;span class=&#34;kr&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;status&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+
+&lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;M&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;get_code&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+  &lt;span class=&#34;kr&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ngx.redirect&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;code_url&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;())&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+
+
+&lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;M&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;set_cookie&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;code&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;kd&#34;&gt;local&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;access_token&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;get_token&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;code&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;ngx.log&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ngx.ERR&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;access_token&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;ngx.header&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Set-Cookie&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;TESTAccessToken=&amp;#34;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;..&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;access_token&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;..&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;; path=/;Max-Age=86400&amp;#34;&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;ngx.redirect&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_conf.start_uri&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+
+
+&lt;span class=&#34;kr&#34;&gt;function&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;M&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;init&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;conf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+  &lt;span class=&#34;n&#34;&gt;_conf&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;conf&lt;/span&gt;
+&lt;span class=&#34;kr&#34;&gt;end&lt;/span&gt;
+
+&lt;span class=&#34;kr&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;M&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/oauth2/">oauth2</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/openresty/">openresty</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>LocalImageServer</title>
+                <link>https://blog.life6585.com/posts/localimageserver/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/localimageserver/</guid>
+                <pubDate>Thu, 25 Nov 2021 17:21:13 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h2 id=&#34;部署&#34;&gt;部署&lt;/h2&gt;
+&lt;h3 id=&#34;minio&#34;&gt;minio&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;docker run -it -d \
+  -p 9000:9000 \
+  -p 9001:9001 \
+  --name minio \
+  -e MINIO_ROOT_USER=username \
+  -e MINIO_ROOT_PASSWORD=password \
+  -v /souban/data/minio:/data \
+  quay.io/minio/minio server /data --console-address &amp;quot;:9001&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;thumbor&#34;&gt;thumbor&lt;/h3&gt;
+&lt;pre&gt;&lt;code&gt;docker run -it -d \
+  -p 80:80 \
+  --name thumbor \
+  -v /souban/data/thumbor/app:/app \
+  minimalcompact/thumbor
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;app目录中包含两个文件&lt;/p&gt;
+&lt;p&gt;.aws/credentials 中填写minio的用户名密码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[default]
+
+aws_access_key_id = username
+
+aws_secret_access_key = password
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;thumbor.conf 增加&lt;/p&gt;
+&lt;p&gt;将默认的Amazon S3地址换成minio运行地址
+TC_AWS_ENDPOINT=&#39;http://10.18.0.95:9000&amp;rsquo;&lt;/p&gt;
+&lt;p&gt;将Thumbor的loader换成tc_aws.loaders.s3_loader
+LOADER = &amp;lsquo;tc_aws.loaders.s3_loader&amp;rsquo;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+################################### Logging ####################################
+
+## Logging configuration as json
+## Defaults to: None
+THUMBOR_LOG_CONFIG = None
+
+## Log Format to be used by thumbor when writing log messages.
+## Defaults to: %(asctime)s %(name)s:%(levelname)s %(message)s
+THUMBOR_LOG_FORMAT = &#39;%(asctime)s %(name)s:%(levelname)s %(message)s&#39;
+
+## Date Format to be used by thumbor when writing log messages.
+## Defaults to: %Y-%m-%d %H:%M:%S
+THUMBOR_LOG_DATE_FORMAT = &#39;%Y-%m-%d %H:%M:%S&#39;
+
+################################################################################
+
+
+################################### Imaging ####################################
+
+## Max width in pixels for images read or generated by thumbor
+## Defaults to: 0
+MAX_WIDTH = 0
+
+## Max height in pixels for images read or generated by thumbor
+## Defaults to: 0
+MAX_HEIGHT = 0
+
+## Max pixel count for images read by thumbor. Set to prevent decompression bomb DOS attack.
+## Defaults to: 75000000 pixels
+MAX_PIXELS = 75000000
+
+## Min width in pixels for images read or generated by thumbor
+## Defaults to: 1
+MIN_WIDTH = 1
+
+## Min width in pixels for images read or generated by thumbor
+## Defaults to: 1
+MIN_HEIGHT = 1
+
+## Allowed domains for the http loader to download. These are regular
+## expressions.
+## Defaults to: []
+ALLOWED_SOURCES =  []
+
+
+## Quality index used for generated JPEG images
+## Defaults to: 80
+QUALITY = 80
+
+## Exports JPEG images with the progressive flag set.
+## Defaults to: True
+PROGRESSIVE_JPEG = True
+
+## Specify subsampling behavior for Pillow (see `subsampling`               in
+## http://pillow.readthedocs.org/en/latest/handbook/image-file-
+## formats.html#jpeg).Be careful to use int for 0,1,2 and string for &amp;quot;4:4:4&amp;quot;
+## notation. Will ignore `quality`. Using `keep` will copy the original file&#39;s
+## subsampling.
+## Defaults to: None
+PILLOW_JPEG_SUBSAMPLING = None
+
+## Specify quantization tables for Pillow (see `qtables`               in
+## http://pillow.readthedocs.org/en/latest/handbook/image-file-
+## formats.html#jpeg). Will ignore `quality`. Using `keep` will copy the
+## original file&#39;s qtables.
+## Defaults to: None
+PILLOW_JPEG_QTABLES = None
+
+## Specify resampling filter for Pillow resize method.One of LANCZOS, NEAREST,
+## BILINEAR, BICUBIC, HAMMING (Pillow&amp;gt;=3.4.0).
+## Defaults to: &#39;LANCZOS&#39;
+PILLOW_RESAMPLING_FILTER = &#39;LANCZOS&#39;
+
+## Quality index used for generated WebP images. If not set (None) the same level
+## of JPEG quality will be used.
+## Defaults to: None
+WEBP_QUALITY = None
+
+
+## Compression level for generated PNG images.
+## Defaults to: 6
+PNG_COMPRESSION_LEVEL = 6
+
+## Specifies whether WebP format should be used automatically if the request
+## accepts it (via Accept header)
+## Defaults to: False
+AUTO_WEBP = False
+
+## Specifies whether non-transparent PNG images should be automatically converted to JPEG
+## Defaults to: False
+AUTO_PNG_TO_JPG = False
+
+## Specify the ratio between 1in and 1px for SVG images. This is only used
+## whenrasterizing SVG images having their size units in cm or inches.
+## Defaults to: 150
+SVG_DPI = 150
+
+## Max AGE sent as a header for the image served by thumbor in seconds
+## Defaults to: 86400
+MAX_AGE = 86400
+
+## Indicates the Max AGE header in seconds for temporary images (images with
+## failed smart detection)
+## Defaults to: 0
+MAX_AGE_TEMP_IMAGE = 0
+
+## Indicates whether thumbor should rotate images that have an Orientation EXIF
+## header
+## Defaults to: False
+RESPECT_ORIENTATION = False
+
+## Ignore errors during smart detections and return image as a temp image (not
+## saved in result storage and with MAX_AGE_TEMP_IMAGE age)
+## Defaults to: False
+IGNORE_SMART_ERRORS = False
+
+## Sends If-Modified-Since &amp;amp; Last-Modified headers; requires support from result
+## storage
+## Defaults to: False
+SEND_IF_MODIFIED_LAST_MODIFIED_HEADERS = False
+
+## Preserves exif information in generated images. Increases image size in
+## kbytes, use with caution.
+## Defaults to: False
+PRESERVE_EXIF_INFO = False
+
+## Indicates whether thumbor should enable the EXPERIMENTAL support for animated
+## gifs.
+## Defaults to: True
+ALLOW_ANIMATED_GIFS = True
+
+## Indicates whether thumbor should use gifsicle engine. Please note that smart
+## cropping and filters are not supported for gifs using gifsicle (but won&#39;t
+## give an error).
+## Defaults to: False
+USE_GIFSICLE_ENGINE = False
+
+## Indicates whether thumbor should enable blacklist functionality to prevent
+## processing certain images.
+## Defaults to: False
+USE_BLACKLIST = False
+
+## Size of the thread pool used for image transformations.  The default value is
+## 0 (don&#39;t use a threadpoool. Increase this if you are seeing your IOLoop
+## getting blocked (often indicated by your upstream HTTP requests timing out)
+## Defaults to: 0
+ENGINE_THREADPOOL_SIZE = 0
+
+
+
+################################################################################
+
+
+################################ Extensibility #################################
+
+## The metrics backend thumbor should use to measure internal actions. This must
+## be the full name of a python module (python must be able to import it)
+## Defaults to: &#39;thumbor.metrics.logger_metrics&#39;
+METRICS = &#39;thumbor.metrics.logger_metrics&#39;
+
+## The loader thumbor should use to load the original image. This must be the
+## full name of a python module (python must be able to import it)
+## Defaults to: thumbor.loaders.http_loader
+LOADER = &#39;thumbor.loaders.http_loader&#39;
+
+## The file storage thumbor should use to store original images. This must be the
+## full name of a python module (python must be able to import it)
+## Defaults to: thumbor.storages.file_storage
+STORAGE = &#39;thumbor.storages.file_storage&#39;
+STORAGE_BUCKET = &#39;&#39;
+RESULT_STORAGE_BUCKET = &#39;&#39;
+
+
+## The result storage thumbor should use to store generated images. This must be
+## the full name of a python module (python must be able to import it)
+## Defaults to: None
+
+RESULT_STORAGE = &#39;thumbor.result_storages.file_storage&#39;
+
+
+## The imaging engine thumbor should use to perform image operations. This must
+## be the full name of a python module (python must be able to import it)
+## Defaults to: thumbor.engines.pil
+ENGINE = &#39;thumbor.engines.pil&#39;
+
+## The gif engine thumbor should use to perform image operations. This must be
+## the full name of a python module (python must be able to import it)
+## Defaults to: &#39;thumbor.engines.gif&#39;
+GIF_ENGINE = &#39;thumbor.engines.gif&#39;
+
+## The url signer thumbor should use to verify url signatures.This must be the
+## full name of a python module (python must be able to import it)
+## Defaults to: &#39;libthumbor.url_signers.base64_hmac_sha1&#39;
+URL_SIGNER = &#39;libthumbor.url_signers.base64_hmac_sha1&#39;
+
+################################################################################
+
+
+################################### Security ###################################
+
+## The security key thumbor uses to sign image URLs
+## Defaults to: MY_SECURE_KEY
+SECURITY_KEY = &#39;MY_SECURE_KEY&#39;
+
+## Indicates if the /unsafe URL should be available
+## Defaults to: True
+ALLOW_UNSAFE_URL = True
+
+## Indicates if encrypted (old style) URLs should be allowed
+## Defaults to: True
+ALLOW_OLD_URLS = True
+
+## AWS access keys - used in thumbor_aws storage
+AWS_ACCESS_KEY = &#39;&#39;
+AWS_SECRET_KEY = &#39;&#39;
+
+################################################################################
+
+##################################### HTTP #####################################
+
+## Enables automatically generated etags
+## Defaults to: True
+ENABLE_ETAGS = True
+
+################################################################################
+
+
+################################### Storage ####################################
+
+## Set maximum id length for images when stored
+## Defaults to: 32
+MAX_ID_LENGTH = 32
+
+################################################################################
+
+
+
+
+################################### Metrics ####################################
+
+## Host to send statsd instrumentation to
+## Defaults to: None
+
+
+## Port to send statsd instrumentation to
+## Defaults to: 8125
+STATSD_PORT = 8125
+
+## Prefix for statsd
+## Defaults to: None
+
+
+################################################################################
+
+################################# File Loader ##################################
+
+## The root path where the File Loader will try to find images
+## Defaults to: /tmp
+FILE_LOADER_ROOT_PATH = &#39;/data/loader&#39;
+
+################################################################################
+
+
+################################# HTTP Loader ##################################
+
+## The maximum number of seconds libcurl can take to connect to an image being
+## loaded
+## Defaults to: 5
+HTTP_LOADER_CONNECT_TIMEOUT = 5
+
+## The maximum number of seconds libcurl can take to download an image
+## Defaults to: 20
+HTTP_LOADER_REQUEST_TIMEOUT = 20
+
+## Indicates whether libcurl should follow redirects when downloading an image
+## Defaults to: True
+HTTP_LOADER_FOLLOW_REDIRECTS = True
+
+## Indicates the number of redirects libcurl should follow when downloading an
+## image
+## Defaults to: 5
+HTTP_LOADER_MAX_REDIRECTS = 5
+
+## The maximum number of simultaneous HTTP connections the loader can make before
+## queuing
+## Defaults to: 10
+HTTP_LOADER_MAX_CLIENTS = 10
+
+## Whether thumbor should forward all client headers
+## Defaults to: False
+HTTP_LOADER_FORWARD_ALL_HEADERS = False
+
+## Indicates whether thumbor should forward the user agent of the requesting user
+## Defaults to: False
+HTTP_LOADER_FORWARD_USER_AGENT = False
+
+## A list of headers the http loader will forward from the client
+## Defaults to: []
+HTTP_LOADER_FORWARD_HEADERS_WHITELIST = []
+
+## Default user agent for thumbor http loader requests
+## Defaults to: Thumbor/6.3.0
+HTTP_LOADER_DEFAULT_USER_AGENT = &#39;Thumbor/6.3.0&#39;
+
+## The proxy host needed to load images through
+## Defaults to: None
+HTTP_LOADER_PROXY_HOST = None
+
+## The proxy port for the proxy host
+## Defaults to: None
+HTTP_LOADER_PROXY_PORT = None
+
+## The proxy username for the proxy host
+## Defaults to: None
+HTTP_LOADER_PROXY_USERNAME = None
+
+## The proxy password for the proxy host
+## Defaults to: None
+HTTP_LOADER_PROXY_PASSWORD = None
+
+## The filename of CA certificates in PEM format
+## Defaults to: None
+HTTP_LOADER_CA_CERTS = None
+
+## Validate the servers certificate for HTTPS requests
+## Defaults to: True
+HTTP_LOADER_VALIDATE_CERTS = True
+
+## The filename for client SSL key
+## Defaults to: None
+HTTP_LOADER_CLIENT_KEY = None
+
+## The filename for client SSL certificate
+## Defaults to: None
+HTTP_LOADER_CLIENT_CERT = None
+
+## If the CurlAsyncHTTPClient should be used
+## Defaults to: False
+HTTP_LOADER_CURL_ASYNC_HTTP_CLIENT = False
+
+
+################################################################################
+
+
+################################# File Storage #################################
+
+## Expiration in seconds for the images in the File Storage. Defaults to one
+## month
+## Defaults to: 2592000
+STORAGE_EXPIRATION_SECONDS = 2592000
+
+## Indicates whether thumbor should store the signing key for each image in the
+## file storage. This allows the key to be changed and old images to still be
+## properly found
+## Defaults to: False
+STORES_CRYPTO_KEY_FOR_EACH_IMAGE = False
+
+## The root path where the File Storage will try to find images
+## Defaults to: /tmp/thumbor/storage
+FILE_STORAGE_ROOT_PATH = &#39;/data/storage&#39;
+
+################################################################################
+
+
+#################################### Upload ####################################
+
+## Max size in Kb for images uploaded to thumbor
+## Aliases: MAX_SIZE
+## Defaults to: 0
+UPLOAD_MAX_SIZE = 0
+
+## Indicates whether thumbor should enable File uploads
+## Aliases: ENABLE_ORIGINAL_PHOTO_UPLOAD
+## Defaults to: False
+UPLOAD_ENABLED = False
+
+## The type of storage to store uploaded images with
+## Aliases: ORIGINAL_PHOTO_STORAGE
+## Defaults to: thumbor.storages.file_storage
+UPLOAD_PHOTO_STORAGE = &#39;thumbor.storages.file_storage&#39;
+
+## Indicates whether image deletion should be allowed
+## Aliases: ALLOW_ORIGINAL_PHOTO_DELETION
+## Defaults to: False
+UPLOAD_DELETE_ALLOWED = False
+
+## Indicates whether image overwrite should be allowed
+## Aliases: ALLOW_ORIGINAL_PHOTO_PUTTING
+## Defaults to: False
+UPLOAD_PUT_ALLOWED = False
+
+## Default filename for image uploaded
+## Defaults to: image
+UPLOAD_DEFAULT_FILENAME = &#39;image&#39;
+
+################################################################################
+
+
+############################### MongoDB Storage ################################
+
+## MongoDB storage server host
+## Defaults to: localhost
+MONGO_STORAGE_SERVER_HOST = &#39;mongo&#39;
+
+## MongoDB storage server port
+## Defaults to: 27017
+MONGO_STORAGE_SERVER_PORT = 27017
+
+## MongoDB storage server database name
+## Defaults to: thumbor
+MONGO_STORAGE_SERVER_DB = &#39;thumbor&#39;
+
+## MongoDB storage image collection
+## Defaults to: images
+MONGO_STORAGE_SERVER_COLLECTION = &#39;images&#39;
+
+################################################################################
+
+
+################################ Redis Storage #################################
+
+## Redis storage server host
+## Defaults to: localhost
+REDIS_STORAGE_SERVER_HOST = &#39;redis&#39;
+
+## Redis storage server port
+## Defaults to: 6379
+REDIS_STORAGE_SERVER_PORT = 6379
+
+## Redis storage database index
+## Defaults to: 0
+REDIS_STORAGE_SERVER_DB = 0
+
+## Redis storage server password
+## Defaults to: None
+REDIS_STORAGE_SERVER_PASSWORD = None
+
+## Ignore Redis storage errors
+## Defaults to: True
+REDIS_STORAGE_IGNORE_ERRORS = True
+
+################################################################################
+
+
+################################ Redis Result Storage #################################
+
+## Redis storage server host
+## Defaults to: localhost
+REDIS_RESULT_STORAGE_SERVER_HOST = &#39;redis&#39;
+
+## Redis storage server port
+## Defaults to: 6379
+REDIS_RESULT_STORAGE_SERVER_PORT = 6379
+
+## Redis storage database index
+## Defaults to: 0
+REDIS_RESULT_STORAGE_SERVER_DB = 0
+
+## Redis storage server password
+## Defaults to: None
+REDIS_RESULT_STORAGE_SERVER_PASSWORD = None
+
+## Ignore Redis result storage errors
+## Defaults to: True
+REDIS_RESULT_STORAGE_IGNORE_ERRORS = True
+
+################################################################################
+
+
+############################### Memcache Storage ###############################
+
+## List of Memcache storage server hosts
+## Defaults to: [&#39;localhost:11211&#39;]
+MEMCACHE_STORAGE_SERVERS = [&#39;localhost:11211&#39;]
+
+
+################################################################################
+
+
+################################ Mixed Storage #################################
+
+## Mixed Storage file storage. This must be the full name of a python module
+## (python must be able to import it)
+## Defaults to: thumbor.storages.no_storage
+MIXED_STORAGE_FILE_STORAGE = &#39;thumbor.storages.no_storage&#39;
+
+## Mixed Storage signing key storage. This must be the full name of a python
+## module (python must be able to import it)
+## Defaults to: thumbor.storages.no_storage
+MIXED_STORAGE_CRYPTO_STORAGE = &#39;thumbor.storages.no_storage&#39;
+
+## Mixed Storage detector information storage. This must be the full name of a
+## python module (python must be able to import it)
+## Defaults to: thumbor.storages.no_storage
+MIXED_STORAGE_DETECTOR_STORAGE = &#39;thumbor.storages.no_storage&#39;
+
+################################################################################
+
+
+##################################### Meta #####################################
+
+## The callback function name that should be used by the META route for JSONP
+## access
+## Defaults to: None
+META_CALLBACK_NAME = None
+
+################################################################################
+
+
+################################## Detection ###################################
+
+## List of detectors that thumbor should use to find faces and/or features. All
+## of them must be full names of python modules (python must be able to import
+## it)
+## Defaults to: []
+#DETECTORS =  [
+#&#39;thumbor.detectors.queued_detector.queued_complete_detector&#39;,
+#&#39;thumbor.detectors.queued_detector.queued_face_detector&#39;,
+#&#39;thumbor.detectors.queued_detector.queued_feature_detector&#39;,
+#&#39;thumbor.detectors.feature_detector&#39;,
+#&#39;thumbor.detectors.face_detector&#39;,
+#]
+DETECTORS = []
+
+## The cascade file that opencv will use to detect faces
+## Defaults to: haarcascade_frontalface_alt.xml
+FACE_DETECTOR_CASCADE_FILE = &#39;haarcascade_frontalface_alt.xml&#39;
+
+## The cascade file that opencv will use to detect glasses.
+## Defaults to: &#39;haarcascade_eye_tree_eyeglasses.xml&#39;
+GLASSES_DETECTOR_CASCADE_FILE = &#39;haarcascade_eye_tree_eyeglasses.xml&#39;
+
+## The cascade file that opencv will use to detect profile faces.
+## Defaults to: &#39;haarcascade_profileface.xml&#39;
+PROFILE_DETECTOR_CASCADE_FILE = &#39;haarcascade_profileface.xml&#39;
+
+################################################################################
+
+
+################################## Optimizers ##################################
+
+## List of optimizers that thumbor will use to optimize images
+## Defaults to: [] --&amp;gt; [&#39;thumbor.optimizers.jpegtran&#39;,]
+OPTIMIZERS = []
+
+
+## Path for the jpegtran binary
+## Defaults to: /usr/bin/jpegtran
+JPEGTRAN_PATH = &#39;/usr/bin/jpegtran&#39;
+# Path for the progressive scans file to use with jpegtran optimizer. Implies progressive jpeg output
+JPEGTRAN_SCANS_FILE = &#39;&#39;
+PROGRESSIVE_JPEG = True
+FFMPEG_PATH = &#39;/usr/bin/ffmpeg&#39; # Default path for the docker installation in debian
+
+################################################################################
+
+
+################################### Filters ####################################
+
+## List of filters that thumbor will allow to be used in generated images. All of
+## them must be full names of python modules (python must be able to import
+## it)
+## using thumbor&#39;s default, unless specified.
+
+
+################################################################################
+
+
+################################ Result Storage ################################
+
+## Expiration in seconds of generated images in the result storage
+## Defaults to: 0
+RESULT_STORAGE_EXPIRATION_SECONDS = 0
+
+## Path where the Result storage will store generated images
+## Defaults to: /tmp/thumbor/result_storage
+RESULT_STORAGE_FILE_STORAGE_ROOT_PATH = &#39;/data/result_storage&#39;
+
+## Indicates whether unsafe requests should also be stored in the Result Storage
+## Defaults to: False
+RESULT_STORAGE_STORES_UNSAFE = False
+
+################################################################################
+
+
+############################ Queued Redis Detector #############################
+
+## Server host for the queued redis detector
+## Defaults to: localhost
+REDIS_QUEUE_SERVER_HOST = &#39;redis&#39;
+
+## Server port for the queued redis detector
+## Defaults to: 6379
+REDIS_QUEUE_SERVER_PORT = 6379
+
+## Server database index for the queued redis detector
+## Defaults to: 0
+REDIS_QUEUE_SERVER_DB = 0
+
+## Server password for the queued redis detector
+## Defaults to: None
+REDIS_QUEUE_SERVER_PASSWORD = None
+
+################################################################################
+
+
+############################# Queued SQS Detector ##############################
+
+## AWS key id
+## Defaults to: None
+SQS_QUEUE_KEY_ID = None
+
+## AWS key secret
+## Defaults to: None
+SQS_QUEUE_KEY_SECRET = None
+
+## AWS SQS region
+## Defaults to: us-east-1
+SQS_QUEUE_REGION = &#39;us-east-1&#39;
+
+################################################################################
+
+
+#################################### Errors ####################################
+
+## This configuration indicates whether thumbor should use a custom error
+## handler.
+## Defaults to: False
+USE_CUSTOM_ERROR_HANDLING = False
+
+## Error reporting module. Needs to contain a class called ErrorHandler with a
+## handle_error(context, handler, exception) method.
+## Defaults to: thumbor.error_handlers.sentry
+ERROR_HANDLER_MODULE = &#39;thumbor.error_handlers.sentry&#39;
+
+## File of error log as json
+## Defaults to: None
+ERROR_FILE_LOGGER = None
+
+## File of error log name is parametrized with context attribute
+## Defaults to: False
+ERROR_FILE_NAME_USE_CONTEXT = False
+
+################################################################################
+
+
+############################### Errors - Sentry ################################
+
+## Sentry thumbor project dsn. i.e.: http://5a63d58ae7b94f1dab3dee740b301d6a:73ee
+## a45d3e8649239a973087e8f21f98@localhost:9000/2
+## Defaults to:
+SENTRY_DSN_URL = &#39;&#39;
+
+################################################################################
+
+################################### General ####################################
+
+# The amount of time to wait before shutting down the server, i.e. stop accepting requests.
+MAX_WAIT_SECONDS_BEFORE_SERVER_SHUTDOWN = 0
+# The amount of time to waut before shutting down all io, after the server has been stopped
+MAX_WAIT_SECONDS_BEFORE_IO_SHUTDOWN = 0
+
+## Custom app class to override ThumborServiceApp. This config value is
+## overridden by the -a command-line parameter.
+## Defaults to: &#39;thumbor.app.ThumborServiceApp&#39;
+APP_CLASS = &#39;thumbor.app.ThumborServiceApp&#39;
+
+################################################################################
+
+############################## TC_AWS ##########################################
+TC_AWS_REGION = &#39;eu-west-1&#39; # AWS Region
+
+# Custom S3 endpoint URL (for GCP, Minio, etc.)
+
+### 将默认的Amazon S3地址换成minio运行地址
+TC_AWS_ENDPOINT=&#39;http://10.18.0.95:9000&#39; 
+
+### 将Thumbor的loader换成tc_aws.loaders.s3_loader
+LOADER = &#39;tc_aws.loaders.s3_loader&#39; 
+
+TC_AWS_STORAGE_BUCKET = &#39;&#39; # S3 bucket for Storage
+TC_AWS_STORAGE_ROOT_PATH = &#39;&#39; # S3 path prefix for Storage bucket
+
+TC_AWS_LOADER_BUCKET = &#39;&#39; #S3 bucket for loader
+TC_AWS_LOADER_ROOT_PATH = &#39;&#39; # S3 path prefix for Loader bucket
+
+TC_AWS_RESULT_STORAGE_BUCKET = &#39;&#39; # S3 bucket for result Storage
+TC_AWS_RESULT_STORAGE_ROOT_PATH = &#39;&#39; # S3 path prefix for Result storage bucket
+
+# put data into S3 using the Server Side Encryption functionality to
+# encrypt data at rest in S3
+# https://aws.amazon.com/about-aws/whats-new/2011/10/04/amazon-s3-announces-server-side-encryption-support/
+TC_AWS_STORAGE_SSE = False
+
+# put data into S3 with Reduced Redundancy
+# https://aws.amazon.com/about-aws/whats-new/2010/05/19/announcing-amazon-s3-reduced-redundancy-storage/
+TC_AWS_STORAGE_RRS = False
+
+# Add some randomization in the S3 keys for the Storage and Result Storage.
+# Defaults to False for Backwards Compatibility, set it to True for performance.
+TC_AWS_RANDOMIZE_KEYS = False
+
+# Enable HTTP Loader as well?
+# This would allow you to load watermarks in over your images dynamically through a URI
+# E.g.
+# http://your-thumbor.com/unsafe/filters:watermark(http://example.com/watermark.png,0,0,50)/s3_bucket/photo.jpg
+TC_AWS_ENABLE_HTTP_LOADER = False
+
+TC_AWS_ALLOWED_BUCKETS = False # List of allowed bucket to be requested
+TC_AWS_STORE_METADATA = False # Store result with metadata (for instance content-type)
+################################################################################
+
+########################## Google Cloud Storage ################################
+CLOUD_STORAGE_BUCKET_ID = &#39;&#39;
+CLOUD_STORAGE_PROJECT_ID = &#39;&#39;
+
+RESULT_STORAGE_CLOUD_STORAGE_PROJECT_ID = &#39;&#39;
+RESULT_STORAGE_CLOUD_STORAGE_BUCKET_ID = &#39;&#39;
+################################################################################
+
+######################### tc_prometheus ########################################
+PROMETHEUS_SCRAPE_PORT = 8000 # Port the prometheus client should listen on
+
+##################### Thumbor Community Extensions #############################
+COMMUNITY_EXTENSIONS = []
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;http://10.18.0.95/unsafe/100x100/test/WechatIMG616.jpeg&lt;/p&gt;
+&lt;p&gt;http://10.18.0.95/unsafe/200x200/test/WechatIMG616.jpeg&lt;/p&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.4k8k.xyz/article/qq_40065776/108321442&#34;&gt;http://www.4k8k.xyz/article/qq_40065776/108321442&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.4k8k.xyz/article/qq_40065776/106039407&#34;&gt;http://www.4k8k.xyz/article/qq_40065776/106039407&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://my.oschina.net/xshuai/blog/5044298&#34;&gt;https://my.oschina.net/xshuai/blog/5044298&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://segmentfault.com/a/1190000008656825&#34;&gt;https://segmentfault.com/a/1190000008656825&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://juejin.cn/post/6914237444216864776&#34;&gt;https://juejin.cn/post/6914237444216864776&lt;/a&gt;&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/minio/">minio</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/thumbor/">thumbor</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>请求token为null</title>
+                <link>https://blog.life6585.com/posts/localstoragelost/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/localstoragelost/</guid>
+                <pubDate>Thu, 25 Nov 2021 09:45:03 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h2 id=&#34;现象&#34;&gt;现象&lt;/h2&gt;
+&lt;p&gt;刷新页面，退出到登录页面,这种情况不定时出现&lt;/p&gt;
+&lt;p&gt;local storage中到token信息被清理&lt;/p&gt;
+&lt;p&gt;failed to load response data: no data found for resource with given identifier&lt;/p&gt;
+&lt;h2 id=&#34;原因及解决&#34;&gt;原因及解决&lt;/h2&gt;
+&lt;p&gt;错误设置access token 的时间大于 refresh token 时间，&lt;/p&gt;
+&lt;p&gt;导致前端认为现在需要清空所有token，重新获取&lt;/p&gt;
+&lt;p&gt;但获取的还是老的access token, refresh token 已被清理&lt;/p&gt;
+&lt;p&gt;刷新页面，又退出到登录页面&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/oauth/">oauth</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/token/">token</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>Public Wifi SSL Notsecure</title>
+                <link>https://blog.life6585.com/posts/public-wifi-notsecure/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/public-wifi-notsecure/</guid>
+                <pubDate>Fri, 05 Nov 2021 17:37:16 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h2 id=&#34;问题&#34;&gt;问题&lt;/h2&gt;
+&lt;p&gt;https网站，星巴克、酒店等公共wifi情况下访问会报错：&lt;/p&gt;
+&lt;p&gt;你的连接不是私密连接,NET:ERR_CERT_AUTHORITY_INVALID&lt;/p&gt;
+&lt;p&gt;其它环境正常&lt;/p&gt;
+&lt;h2 id=&#34;原因&#34;&gt;原因&lt;/h2&gt;
+&lt;p&gt;用https://www.ssllabs.com/ssltest/ 检测网站正常&lt;/p&gt;
+&lt;p&gt;网站启用了HSTS，本来是为http跳转到https这步更安全&lt;/p&gt;
+&lt;p&gt;但星巴克这种公共wifi 会有个登录页面，打断正常请求，导致浏览器就认为不安全&lt;/p&gt;
+&lt;h2 id=&#34;解决&#34;&gt;解决&lt;/h2&gt;
+&lt;p&gt;关闭hsts&lt;/p&gt;
+&lt;p&gt;我们用的是nginx-ingress&lt;/p&gt;
+&lt;p&gt;添加nginx-configuration.yaml&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+  name: nginx-configuration
+  namespace: ingress-nginx
+data:
+  hsts: &amp;quot;false&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;pre&gt;&lt;code&gt;kubectl apply -f nginx-configuration.yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;检测 &lt;a href=&#34;https://www.ssleye.com/ssltool/hsts_check.html&#34;&gt;https://www.ssleye.com/ssltool/hsts_check.html&lt;/a&gt;&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/hsts/">hsts</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/ssl/">ssl</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>Ssl Expire Check</title>
+                <link>https://blog.life6585.com/posts/ssl-expire-check/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/ssl-expire-check/</guid>
+                <pubDate>Fri, 16 Jul 2021 17:31:26 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;p&gt;先从阿里云导出域名列表&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;30
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;31
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;32
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;33
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;34
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;35
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;36
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;37
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;38
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;39
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;pandas&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;pd&lt;/span&gt;
+&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;socket&lt;/span&gt;
+&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;ssl&lt;/span&gt;
+&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;datetime&lt;/span&gt;
+
+&lt;span class=&#34;n&#34;&gt;excel_path&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;./domain.io.xlsx&amp;#39;&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;d&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pd&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;read_excel&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;excel_path&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;sheet_name&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;domain.io&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;d1&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;d&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;d&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;记录类型&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;!=&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;MX&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;d&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;记录类型&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;!=&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;TXT&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;主机记录&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[]&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;index&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;row&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;d1&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;iteritems&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;():&lt;/span&gt;
+     &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;append&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;row&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    
+&lt;span class=&#34;n&#34;&gt;domain&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;.domain.io&amp;#34;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+
+
+&lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;ssl_expiry_datetime&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;hostname&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;ssl_date_fmt&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;sa&#34;&gt;r&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;%b &lt;/span&gt;&lt;span class=&#34;si&#34;&gt;%d&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt; %H:%M:%S %Y %Z&amp;#39;&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;context&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ssl&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;create_default_context&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;conn&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;context&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;wrap_socket&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;socket&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;socket&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;socket&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;AF_INET&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;),&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;server_hostname&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;hostname&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;# 3 second timeout because Lambda has runtime limitations&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;conn&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;settimeout&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mf&#34;&gt;3.0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;conn&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;connect&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;hostname&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;443&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;ssl_info&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;conn&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;getpeercert&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;# parse the string from the certificate into a Python datetime object&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;datetime&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;datetime&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;strptime&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ssl_info&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;notAfter&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;],&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ssl_date_fmt&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;i&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;domain&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;try&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;t&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ssl_expiry_datetime&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+        &lt;span class=&#34;k&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;t&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;end&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+        &lt;span class=&#34;k&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;except&lt;/span&gt; &lt;span class=&#34;ne&#34;&gt;Exception&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;e&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+        &lt;span class=&#34;k&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;e&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;end&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+        &lt;span class=&#34;k&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;i&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/python/">python</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/ssl/">ssl</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>Ingress Snippet Not Work</title>
+                <link>https://blog.life6585.com/posts/ingress-snippet-not-work/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/ingress-snippet-not-work/</guid>
+                <pubDate>Fri, 16 Jul 2021 17:10:26 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h1 id=&#34;现象&#34;&gt;现象&lt;/h1&gt;
+&lt;p&gt;ingress snippet 配置之后不生效，如下
+增加了一个验证/jOIZN4meSj.txt 的配置，但访问不生效
+老的/actuator确实返回403&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;    nginx.ingress.kubernetes.io/server-snippet: |
+        location = /jOIZN4meSj.txt {
+           return 200 &amp;quot;17bc5900ff3e50d67ba89514317ac1d0&amp;quot;;
+        }
+        location ~ /actuator {
+            deny all;
+        }
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&#34;定位&#34;&gt;定位&lt;/h1&gt;
+&lt;ol&gt;
+&lt;li&gt;查看nginx-ingress pod 中 的nginx.conf 配置&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;对应的域名下面确实没有新增&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;        location = /jOIZN4meSj.txt {
+           return 200 &amp;quot;17bc5900ff3e50d67ba89514317ac1d0&amp;quot;;
+        }
+&lt;/code&gt;&lt;/pre&gt;&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;查看 nginx-ingress pod  的日志&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;W0716 08:31:18.554066       6 controller.go:1089] Server snippet already configured for server &amp;quot;rc-accounts.test.io&amp;quot;, skipping (Ingress &amp;quot;test/rc-auth-ingress&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;确定是因为多个yaml 中，包含重复的snippet 配置，导致后面的配置被skip&lt;/p&gt;
+&lt;h1 id=&#34;修复&#34;&gt;修复&lt;/h1&gt;
+&lt;p&gt;同一个域名的snippet 整理到一个yaml 文件中&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/virtualization/">virtualization</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/k8s/">k8s</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/ingress/">ingress</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>前端访问阿里云cdn静态资源失败</title>
+                <link>https://blog.life6585.com/posts/alicloud-cdn-offline/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/alicloud-cdn-offline/</guid>
+                <pubDate>Mon, 25 Jan 2021 11:19:09 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h2 id=&#34;背景&#34;&gt;背景：&lt;/h2&gt;
+&lt;p&gt;前端服务器部署在阿里云ecs，静态资源部署在阿里云cdn，前端server通过proxy_pass访问阿里云CDN&lt;/p&gt;
+&lt;h2 id=&#34;现象&#34;&gt;现象：&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://app.creams.io/public/js/rewriteFunc/toFixed.js&#34;&gt;https://app.creams.io/public/js/rewriteFunc/toFixed.js&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;静态资源无法访问&lt;/p&gt;
+&lt;h2 id=&#34;分析&#34;&gt;分析：&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;怀疑CDN, OSS 存在问题&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a href=&#34;https://static.creams.io/web-master/public/js/rewriteFunc/toFixed.js&#34;&gt;https://static.creams.io/web-master/public/js/rewriteFunc/toFixed.js&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://creams-static.oss-cn-hangzhou.aliyuncs.com/web-master/public/js/rewriteFunc/toFixed.js&#34;&gt;https://creams-static.oss-cn-hangzhou.aliyuncs.com/web-master/public/js/rewriteFunc/toFixed.js&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;测试正常&lt;/p&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;怀疑前端服务器与阿里云CDN通信不正常，在前端服务器节点测试&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a href=&#34;https://static.creams.io/web-master/public/js/rewriteFunc/toFixed.js&#34;&gt;https://static.creams.io/web-master/public/js/rewriteFunc/toFixed.js&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://creams-static.oss-cn-hangzhou.aliyuncs.com/web-master/public/js/rewriteFunc/toFixed.js&#34;&gt;https://creams-static.oss-cn-hangzhou.aliyuncs.com/web-master/public/js/rewriteFunc/toFixed.js&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;测试正常&lt;/p&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;前端服务器本地请求&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a href=&#34;https://app.creams.io/public/js/rewriteFunc/toFixed.js&#34;&gt;https://app.creams.io/public/js/rewriteFunc/toFixed.js&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;http://localhost:8889/public/js/rewriteFunc/toFixed.js&lt;/p&gt;
+&lt;p&gt;失败&lt;/p&gt;
+&lt;p&gt;查看nginx错误日志&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;2021/01/25 01:38:15 [error] 7#7: *825 upstream timed out (110: Operation timed out) while connecting to upstream, client: 127.0.0.1, server: , request: &amp;ldquo;GET /public/js/rewriteFunc/toFixed.js HTTP/1.1&amp;rdquo;, upstream: &amp;ldquo;https://114.80.187.99:443/web-master/public/js/rewriteFunc/toFixed.js&amp;rdquo;, host: &amp;ldquo;localhost:8889&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;114.80.187.99与本地PING解析不一致&lt;/p&gt;
+&lt;p&gt;发阿里云工单，确认114.80.187.99CDN节点已下线，但nginx dns cache导致一直请求已下线节点&lt;/p&gt;
+&lt;h2 id=&#34;解决&#34;&gt;解决&lt;/h2&gt;
+&lt;p&gt;ngin 增加配置resovler，指向阿里云公共dns&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;resolver 223.5.5.5 223.6.6.6;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.nadeau.tv/post/nginx-proxy_pass-dns-cache/&#34;&gt;https://www.nadeau.tv/post/nginx-proxy_pass-dns-cache/&lt;/a&gt;&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/alicloud/">alicloud</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/cdn/">cdn</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>Yapi Ssl</title>
+                <link>https://blog.life6585.com/posts/yapi-ssl/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/yapi-ssl/</guid>
+                <pubDate>Tue, 17 Nov 2020 10:56:12 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h2 id=&#34;问题&#34;&gt;问题：&lt;/h2&gt;
+&lt;p&gt;yapi 模仿请求https://www.alipay.com 的时候报错：&lt;/p&gt;
+&lt;p&gt;write EPROTO 140447099377472:error:1408F10B:SSL routines:ssl3_get_record:wrong version number:ssl/record/ssl3_record.c:332:&lt;/p&gt;
+&lt;p&gt;直接请求没有问题&lt;/p&gt;
+&lt;p&gt;另外请求https://www.baidu.com的时候没有问题&lt;/p&gt;
+&lt;h2 id=&#34;解决&#34;&gt;解决：&lt;/h2&gt;
+&lt;p&gt;使用https://www.ssllabs.com/ssltest/对比了一下两个站点，发现最低ssl版本要求不一样&lt;/p&gt;
+&lt;p&gt;怀疑浏览器兼容tls1.2,但yapi用nodejs 作为客户端请求https://www.alipay.com 的过程中协商 tls协议出问题&lt;/p&gt;
+&lt;p&gt;先怀疑nodejs 10 不支持tls 1.3 导致，升级至 nodej 12，未解决问题&lt;/p&gt;
+&lt;p&gt;设置NODE_OPTIONS=&amp;ndash;tls-min-v1.2,强制版本为tls1.2  node server/app.js 后ok&lt;/p&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考：&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://nodejs.org/api/tls.html#tls_modifying_the_default_tls_cipher_suite&#34;&gt;https://nodejs.org/api/tls.html#tls_modifying_the_default_tls_cipher_suite&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://nodejs.org/api/cli.html#cli_node_options_options&#34;&gt;https://nodejs.org/api/cli.html#cli_node_options_options&lt;/a&gt;&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/yapi/">yapi</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/ssl/">ssl</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>Patch Git Commit Id Plugin</title>
+                <link>https://blog.life6585.com/posts/patch-git-commit-id-plugin/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/patch-git-commit-id-plugin/</guid>
+                <pubDate>Tue, 13 Oct 2020 10:24:11 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h2 id=&#34;问题&#34;&gt;问题&lt;/h2&gt;
+&lt;p&gt;想给所有的service增加maven git-commit-id-plugin,实现版本与代码关联&lt;/p&gt;
+&lt;p&gt;微服务代码使用了git的submodule批量管理&lt;/p&gt;
+&lt;h2 id=&#34;解决&#34;&gt;解决&lt;/h2&gt;
+&lt;p&gt;pom.xml 需要增加以下依赖,保存为/tmp/add.xml&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;            &amp;lt;plugin&amp;gt;
+                &amp;lt;groupId&amp;gt;pl.project13.maven&amp;lt;/groupId&amp;gt;
+                &amp;lt;artifactId&amp;gt;git-commit-id-plugin&amp;lt;/artifactId&amp;gt;
+                &amp;lt;version&amp;gt;4.0.0&amp;lt;/version&amp;gt;
+                &amp;lt;executions&amp;gt;
+                    &amp;lt;execution&amp;gt;
+                        &amp;lt;id&amp;gt;get-the-git-infos&amp;lt;/id&amp;gt;
+                        &amp;lt;phase&amp;gt;initialize&amp;lt;/phase&amp;gt;
+                        &amp;lt;goals&amp;gt;
+                            &amp;lt;goal&amp;gt;revision&amp;lt;/goal&amp;gt;
+                        &amp;lt;/goals&amp;gt;
+                    &amp;lt;/execution&amp;gt;
+                &amp;lt;/executions&amp;gt;
+                &amp;lt;configuration&amp;gt;
+                    &amp;lt;dotGitDirectory&amp;gt;${project.basedir}/.git&amp;lt;/dotGitDirectory&amp;gt;
+                    &amp;lt;verbose&amp;gt;false&amp;lt;/verbose&amp;gt;
+                    &amp;lt;dateFormat&amp;gt;yyyy-MM-dd HH:mm:ss&amp;lt;/dateFormat&amp;gt;
+                    &amp;lt;prefix&amp;gt;git&amp;lt;/prefix&amp;gt;
+                    &amp;lt;generateGitPropertiesFile&amp;gt;true&amp;lt;/generateGitPropertiesFile&amp;gt;
+                    &amp;lt;generateGitPropertiesFilename&amp;gt;${project.build.outputDirectory}/git.properties&amp;lt;/generateGitPropertiesFilename&amp;gt;
+                    &amp;lt;format&amp;gt;json&amp;lt;/format&amp;gt;
+                    &amp;lt;gitDescribe&amp;gt;
+                        &amp;lt;skip&amp;gt;false&amp;lt;/skip&amp;gt;
+                        &amp;lt;always&amp;gt;false&amp;lt;/always&amp;gt;
+                        &amp;lt;dirty&amp;gt;-dirty&amp;lt;/dirty&amp;gt;
+                    &amp;lt;/gitDescribe&amp;gt;
+                &amp;lt;/configuration&amp;gt;
+            &amp;lt;/plugin&amp;gt;           
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;批量修改&lt;/p&gt;
+&lt;p&gt;创建 ~/.netrc 避免手动输入用户名、密码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;machine git.souban.io
+login username
+password password
+&lt;/code&gt;&lt;/pre&gt;&lt;pre&gt;&lt;code&gt;git clone https://git.souban.io/Server/CREAMS/creams-microservices.git
+cd creams-microservices
+git checkout release
+git submodule update --init --recursive
+git submodule foreach &#39;git checkout release&#39;
+git submodule foreach &#39;git pull&#39;
+
+git status
+git submodule status
+
+find ./*-service -name &amp;quot;pom.xml&amp;quot; | xargs sed -i &amp;quot;/&amp;lt;plugins&amp;gt;/r /tmp/add.xml&amp;quot;
+
+git submodule foreach &#39;git commit -am &amp;quot;feat(maven): add git-commit-id-plugin&amp;quot; || :&#39;
+git submodule foreach &#39;git push || :&#39;
+git commit -am &#39;update&#39;
+git push --recurse-submodules=check
+
+&lt;/code&gt;&lt;/pre&gt;</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/maven/">maven</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/shell/">shell</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>Packer Build Centos7 Ami</title>
+                <link>https://blog.life6585.com/posts/packer-build-centos7-ami/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/packer-build-centos7-ami/</guid>
+                <pubDate>Mon, 10 Aug 2020 18:41:00 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;p&gt;在mac上用packer基于iso制作centos7 aws ami镜像&lt;/p&gt;
+&lt;h2 id=&#34;install-visualbox--packer&#34;&gt;install visualbox &amp;amp; packer&lt;/h2&gt;
+&lt;p&gt;visualbox: 6.0&lt;/p&gt;
+&lt;p&gt;packer: 1.6.1&lt;/p&gt;
+&lt;p&gt;packer安装比较简单，省略安装过程&lt;/p&gt;
+&lt;h2 id=&#34;生成kickstart文件&#34;&gt;生成kickstart文件&lt;/h2&gt;
+&lt;p&gt;先用visualbox的虚拟机手动安装一遍操作系统，根据生成的/root/anaconda-ks.cfg稍微改动生成自己要的kickstart文件&lt;/p&gt;
+&lt;p&gt;默认用户centos密码centos&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;mkdir http
+cp ./centos7.8-ks.cfg ./http
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;ks.cfg&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#version=DEVEL
+# System authorization information
+auth --enableshadow --passalgo=sha512
+# Use CDROM installation media
+cdrom
+# Use graphical install
+text
+# Run the Setup Agent on first boot
+firstboot --enable
+ignoredisk --only-use=sda
+# Keyboard layouts
+keyboard --vckeymap=us --xlayouts=&#39;us&#39;
+# System language
+lang en_US.UTF-8 --addsupport=zh_CN.UTF-8
+
+# Network information
+network  --bootproto=dhcp --device=eth0 --onboot=on --ipv6=auto --activate
+network  --hostname=localhost.localdomain
+
+# Root password
+rootpw --iscrypted $6$coVd7Fm.ScyzVI0Z$/N26LC6qv.Pm7fOaZRww7YO4gNaQlQUyfnR1vNCigHXx./uTDegDgeOvLh7KZ0M6mfBqs.f1BEEKu9zvTRz2b1
+# System services
+services --enabled=&amp;quot;chronyd&amp;quot;
+# System timezone
+timezone Asia/Shanghai --isUtc
+user --name=centos --password=$6$WULB6LDSYWKEQKLC$WUsTHeafI/8QW0t9b9kvWGCMgfntdSTR.DLSqMHw4.5TiH6i92qwmBXyJ5KiotpitKrc1WWI.1vWATP4kMJz.0 --iscrypted --gecos=&amp;quot;centos&amp;quot;
+# System bootloader configuration
+bootloader --append=&amp;quot; crashkernel=auto&amp;quot; --location=mbr --boot-drive=sda
+# Partition clearing information
+clearpart --none --initlabel
+# Disk partitioning information
+part / --fstype=&amp;quot;ext4&amp;quot; --ondisk=sda --size=8191
+
+%packages
+@^minimal
+@core
+chrony
+kexec-tools
+
+%end
+
+%addon com_redhat_kdump --enable --reserve-mb=&#39;auto&#39;
+
+%end
+
+%anaconda
+pwpolicy root --minlen=6 --minquality=1 --notstrict --nochanges --notempty
+pwpolicy user --minlen=6 --minquality=1 --notstrict --nochanges --emptyok
+pwpolicy luks --minlen=6 --minquality=1 --notstrict --nochanges --notempty
+%end
+
+%post
+echo &amp;quot;centos        ALL=(ALL)       NOPASSWD: ALL&amp;quot; &amp;gt;&amp;gt; /etc/sudoers.d/centos
+echo &amp;quot;Defaults:centos !requiretty&amp;quot;                 &amp;gt;&amp;gt; /etc/sudoers.d/centos
+chmod 0440 /etc/sudoers.d/centos
+%end
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;aws&#34;&gt;aws&lt;/h2&gt;
+&lt;h3 id=&#34;创建--s3--artisan-packer-image-s3&#34;&gt;创建  s3  artisan-packer-image-s3&lt;/h3&gt;
+&lt;h3 id=&#34;创建-import-role&#34;&gt;创建 import role&lt;/h3&gt;
+&lt;p&gt;没有创建相关role的话，可以上次镜像文件到S3，但不能转成ami&lt;/p&gt;
+&lt;p&gt;trust-policy.json&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{
+   &amp;quot;Version&amp;quot;: &amp;quot;2012-10-17&amp;quot;,
+   &amp;quot;Statement&amp;quot;: [
+      {
+         &amp;quot;Effect&amp;quot;: &amp;quot;Allow&amp;quot;,
+         &amp;quot;Principal&amp;quot;: { &amp;quot;Service&amp;quot;: &amp;quot;vmie.amazonaws.com&amp;quot; },
+         &amp;quot;Action&amp;quot;: &amp;quot;sts:AssumeRole&amp;quot;,
+         &amp;quot;Condition&amp;quot;: {
+            &amp;quot;StringEquals&amp;quot;:{
+               &amp;quot;sts:Externalid&amp;quot;: &amp;quot;vmimport&amp;quot;
+            }
+         }
+      }
+   ]
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;pre&gt;&lt;code&gt;aws iam create-role --role-name vmimport --assume-role-policy-document &amp;quot;file:///jumen/work/aws/vmimport/trust-policy.json&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;role-policy.json&lt;/p&gt;
+&lt;p&gt;用的中国大陆宁夏区域，所以s3的ARN比较特殊，以aws-cn开头,不是默认的aws&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{
+   &amp;quot;Version&amp;quot;:&amp;quot;2012-10-17&amp;quot;,
+   &amp;quot;Statement&amp;quot;:[
+      {
+         &amp;quot;Effect&amp;quot;: &amp;quot;Allow&amp;quot;,
+         &amp;quot;Action&amp;quot;: [
+            &amp;quot;s3:GetBucketLocation&amp;quot;,
+            &amp;quot;s3:GetObject&amp;quot;,
+            &amp;quot;s3:ListBucket&amp;quot; 
+         ],
+         &amp;quot;Resource&amp;quot;: [
+            &amp;quot;arn:aws-cn:s3:::artisan-packer-image-s3&amp;quot;,
+            &amp;quot;arn:aws-cn:s3:::artisan-packer-image-s3/*&amp;quot;
+         ]
+      },
+      {
+         &amp;quot;Effect&amp;quot;: &amp;quot;Allow&amp;quot;,
+         &amp;quot;Action&amp;quot;: [
+            &amp;quot;s3:GetBucketLocation&amp;quot;,
+            &amp;quot;s3:GetObject&amp;quot;,
+            &amp;quot;s3:ListBucket&amp;quot;,
+            &amp;quot;s3:PutObject&amp;quot;,
+            &amp;quot;s3:GetBucketAcl&amp;quot;
+         ],
+         &amp;quot;Resource&amp;quot;: [
+            &amp;quot;arn:aws-cn:s3:::artisan-packer-image-s3&amp;quot;,
+            &amp;quot;arn:aws-cn:s3:::artisan-packer-image-s3/*&amp;quot;
+         ]
+      },
+      {
+         &amp;quot;Effect&amp;quot;: &amp;quot;Allow&amp;quot;,
+         &amp;quot;Action&amp;quot;: [
+            &amp;quot;ec2:ModifySnapshotAttribute&amp;quot;,
+            &amp;quot;ec2:CopySnapshot&amp;quot;,
+            &amp;quot;ec2:RegisterImage&amp;quot;,
+            &amp;quot;ec2:Describe*&amp;quot;
+         ],
+         &amp;quot;Resource&amp;quot;: &amp;quot;*&amp;quot;
+      },
+     {
+       &amp;quot;Effect&amp;quot;: &amp;quot;Allow&amp;quot;,
+       &amp;quot;Action&amp;quot;: [
+         &amp;quot;kms:CreateGrant&amp;quot;,
+         &amp;quot;kms:Decrypt&amp;quot;,
+         &amp;quot;kms:DescribeKey&amp;quot;,
+         &amp;quot;kms:Encrypt&amp;quot;,
+         &amp;quot;kms:GenerateDataKey*&amp;quot;,
+         &amp;quot;kms:ReEncrypt*&amp;quot;
+       ],
+       &amp;quot;Resource&amp;quot;: &amp;quot;*&amp;quot;
+     },
+    {
+      &amp;quot;Effect&amp;quot;: &amp;quot;Allow&amp;quot;,
+      &amp;quot;Action&amp;quot;: [
+        &amp;quot;license-manager:GetLicenseConfiguration&amp;quot;,
+        &amp;quot;license-manager:UpdateLicenseSpecificationsForResource&amp;quot;,
+        &amp;quot;license-manager:ListLicenseSpecificationsForResource&amp;quot;
+      ],
+      &amp;quot;Resource&amp;quot;: &amp;quot;*&amp;quot;
+    }
+   ]
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;pre&gt;&lt;code&gt;aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-document &amp;quot;file:///jumen/work/aws/vmimport/role-policy.json&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;packer&#34;&gt;packer&lt;/h2&gt;
+&lt;p&gt;centos_7.08_64_8G.json&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{
+    &amp;quot;description&amp;quot;: &amp;quot;Bare CentOS 7 prepped for AMI import&amp;quot;,
+    &amp;quot;variables&amp;quot;: {
+        &amp;quot;aws_access_key&amp;quot;: &amp;quot;{{env `AWS_ACCESS_KEY_ID`}}&amp;quot;,
+        &amp;quot;aws_secret_key&amp;quot;: &amp;quot;{{env `AWS_SECRET_ACCESS_KEY`}}&amp;quot;,
+        &amp;quot;iso_url&amp;quot;: &amp;quot;https://mirrors.aliyun.com/centos/7.8.2003/isos/x86_64/CentOS-7-x86_64-Minimal-2003.iso&amp;quot;,
+        &amp;quot;iso_checksum&amp;quot;: &amp;quot;659691c28a0e672558b003d223f83938f254b39875ee7559d1a4a14c79173193&amp;quot;,
+        &amp;quot;iso_checktype&amp;quot;: &amp;quot;sha256&amp;quot;,
+        &amp;quot;ssh_username&amp;quot;: &amp;quot;centos&amp;quot;,
+        &amp;quot;ssh_password&amp;quot;: &amp;quot;centos&amp;quot;,
+        &amp;quot;vm_name&amp;quot;: &amp;quot;CentOS7.8-Minimal&amp;quot;,
+        &amp;quot;disk_size&amp;quot;: &amp;quot;8192&amp;quot;,
+        &amp;quot;memory&amp;quot;: &amp;quot;4192&amp;quot;,
+        &amp;quot;cpus&amp;quot;: &amp;quot;2&amp;quot;
+    },
+    &amp;quot;builders&amp;quot;: [{
+        &amp;quot;type&amp;quot;: &amp;quot;virtualbox-iso&amp;quot;,
+        &amp;quot;guest_os_type&amp;quot;: &amp;quot;RedHat_64&amp;quot;,
+        &amp;quot;iso_url&amp;quot;: &amp;quot;{{user `iso_url`}}&amp;quot;,
+        &amp;quot;iso_checksum&amp;quot;: &amp;quot;{{user `iso_checktype`}}:{{user `iso_checksum`}}&amp;quot;,
+        &amp;quot;ssh_username&amp;quot;: &amp;quot;{{user `ssh_username`}}&amp;quot;,
+        &amp;quot;ssh_password&amp;quot;: &amp;quot;{{user `ssh_password`}}&amp;quot;,
+        &amp;quot;ssh_wait_timeout&amp;quot;: &amp;quot;10000s&amp;quot;,
+        &amp;quot;shutdown_command&amp;quot;: &amp;quot;sudo -S shutdown -P now&amp;quot;,
+        &amp;quot;vm_name&amp;quot;: &amp;quot;{{user `vm_name`}}&amp;quot;,
+        &amp;quot;disk_size&amp;quot;: &amp;quot;{{user `disk_size`}}&amp;quot;,
+        &amp;quot;output_directory&amp;quot;: &amp;quot;output-{{user `vm_name`}}&amp;quot;,
+        &amp;quot;http_directory&amp;quot;: &amp;quot;http&amp;quot;,
+        &amp;quot;boot_command&amp;quot;: [&amp;quot;&amp;lt;tab&amp;gt; text ks=http://{{.HTTPIP}}:{{.HTTPPort}}/centos7.8-ks.cfg&amp;lt;enter&amp;gt;&amp;lt;wait&amp;gt;&amp;quot;],
+        &amp;quot;format&amp;quot;: &amp;quot;ova&amp;quot;,
+        &amp;quot;vboxmanage&amp;quot;: [
+            [&amp;quot;modifyvm&amp;quot;, &amp;quot;{{.Name}}&amp;quot;, &amp;quot;--memory&amp;quot;, &amp;quot;{{user `memory`}}&amp;quot;],
+            [&amp;quot;modifyvm&amp;quot;, &amp;quot;{{.Name}}&amp;quot;, &amp;quot;--cpus&amp;quot;, &amp;quot;{{user `cpus`}}&amp;quot;]
+        ]
+    }],
+    &amp;quot;post-processors&amp;quot;: [{
+        &amp;quot;type&amp;quot;: &amp;quot;amazon-import&amp;quot;,
+        &amp;quot;access_key&amp;quot;: &amp;quot;{{user `aws_access_key`}}&amp;quot;,
+        &amp;quot;secret_key&amp;quot;: &amp;quot;{{user `aws_secret_key`}}&amp;quot;,
+        &amp;quot;region&amp;quot;: &amp;quot;cn-northwest-1&amp;quot;,
+        &amp;quot;s3_bucket_name&amp;quot;: &amp;quot;artisan-packer-image-s3&amp;quot;,
+        &amp;quot;license_type&amp;quot;: &amp;quot;BYOL&amp;quot;,
+        &amp;quot;tags&amp;quot;: {
+            &amp;quot;Description&amp;quot;: &amp;quot;packer amazon import &amp;quot;
+        }
+    }]
+
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;pre&gt;&lt;code&gt;export AWS_ACCESS_KEY_ID=XXX
+export AWS_SECRET_ACCESS_KEY=YYY
+packer validate centos_7.08_64_8G.json 
+packer build centos_7.08_64_8G.json 
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;reference&#34;&gt;reference&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;http://work.haufegroup.io/automate-ami-with-packer/&#34;&gt;http://work.haufegroup.io/automate-ami-with-packer/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.internet2.edu/docker/packer-centos-7/blob/master/aws-centos7-base.json&#34;&gt;https://github.internet2.edu/docker/packer-centos-7/blob/master/aws-centos7-base.json&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/allyunion/packer-aws-centos7/blob/master/aws-centos7-base.json&#34;&gt;https://github.com/allyunion/packer-aws-centos7/blob/master/aws-centos7-base.json&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/irvingpop/packer-chef-highperf-centos-ami/blob/master/create_base_ami/packer.json&#34;&gt;https://github.com/irvingpop/packer-chef-highperf-centos-ami/blob/master/create_base_ami/packer.json&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/allyunion/packer-aws-centos7&#34;&gt;https://github.com/allyunion/packer-aws-centos7&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://technologist.pro/devops/infrastructure-as-code-create-linux-rhelcentos-base-images-using-packer&#34;&gt;http://technologist.pro/devops/infrastructure-as-code-create-linux-rhelcentos-base-images-using-packer&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;问题&#34;&gt;问题&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;Waiting for SSH to become available&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;刚开始用的visulbox no-gui模式，无法定位问题，后面直接用GUI模式安装&lt;/p&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;Post-processor failed: Failed to start import from s3://artisan-packer-image-s3/packer-import-1597042426.ova: retry count exhausted. Last err: InvalidParameter: The service role vmimport provided does not exist or does not have sufficient permissions
+status code: 400, request id: 4456c33c-4174-4ee0-b7fd-6b784ab20167&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;aws s3 转为 ami 需要特定role&lt;/p&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;An error occurred (MalformedPolicyDocument) when calling the PutRolePolicy operation: Partition &amp;ldquo;aws&amp;rdquo; is not valid for resource &amp;ldquo;arn:aws:s3:::artisan-packer-image-s3&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;中国宁夏区域 特殊： 前缀为aws-cn&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/devops/">devops</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/packer/">packer</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>Istio 1.6安装问题记录</title>
+                <link>https://blog.life6585.com/posts/istio-1.6-install/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/istio-1.6-install/</guid>
+                <pubDate>Sat, 20 Jun 2020 22:22:22 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h2 id=&#34;problem&#34;&gt;problem&lt;/h2&gt;
+&lt;p&gt;k8s 1.17二进制部署安装，安装istio 1.6.0的时候碰到以下报错&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;configmap &amp;ldquo;istio-ca-root-cert&amp;rdquo; not found&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;MountVolume.SetUp failed for volume &amp;ldquo;istio-token&amp;rdquo; : failed to fetch token: the API server does not have TokenRequest endpoints enabled&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;2020-06-10T13:51:44.017157Z     warn    serverca        Authentication failed: Authenticator ClientCertAuthenticator at index 0 got error: no verified chain is found. Authenticator KubeJWTAuthenticator at index 1 got error: failed to validate the JWT: the service account authentication returns an error: [invalid bearer token, square/go-jose: error in cryptographic primitive]. Authenticator ClientCertAuthenticator at index 2 got error: no verified chain is found.
+2020-06-10T13:51:44.017202Z     warn    serverca        request authentication failure
+2020-06-10T13:51:44.122245Z     info    grpc: Server.Serve failed to complete security handshake from &amp;ldquo;172.23.0.231:51822&amp;rdquo;: EOF
+2020-06-10T13:51:44.821641Z     info    grpc: Server.Serve failed to complete security handshake from &amp;ldquo;172.23.144.6:49404&amp;rdquo;: remote error: tls: error decrypting message&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;同一个问题引起: k8s api server缺少service account相关配置或者配置错误&lt;/p&gt;
+&lt;p&gt;正确配置(证书路径根据实际情况配置)：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;  --service-account-signing-key-file=/etc/kubernetes/certs/kubernetes-key.pem \
+  --service-account-key-file=/etc/kubernetes/certs/kubernetes.pem \
+  --service-account-issuer=api \
+  --service-account-api-audiences=api,vault,factors \
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;重启k8s api server&lt;/p&gt;
+&lt;h2 id=&#34;安装istio&#34;&gt;安装istio&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 安装istio&lt;/span&gt;
+wget https://github.com/istio/istio/releases/download/1.6.1/istio-1.6.1-linux-amd64.tar.gz
+
+tar -zxvf istio-1.6.1-linux-amd64.tar.gz
+
+&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; istio-1.6.1
+
+cp bin/istioctl /usr/local/bin/
+
+cp tools/istioctl.bash ~/
+
+~/.bashrc 增加 &lt;span class=&#34;nb&#34;&gt;source&lt;/span&gt; ~/istioctl.bash
+
+&lt;span class=&#34;nb&#34;&gt;source&lt;/span&gt; ~/.bashrc
+
+istioctl manifest versions
+
+istioctl manifest generate --set &lt;span class=&#34;nv&#34;&gt;profile&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;default &lt;span class=&#34;se&#34;&gt;\
+&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;&lt;/span&gt;         --set values.gateways.istio-ingressgateway.type&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;NodePort &lt;span class=&#34;se&#34;&gt;\
+&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;&lt;/span&gt;         --set components.cni.enabled&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;true&lt;/span&gt; &lt;span class=&#34;se&#34;&gt;\
+&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;&lt;/span&gt;         --set values.cni.cniBinDir&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;/opt/cni/bin&amp;#39;&lt;/span&gt; &lt;span class=&#34;se&#34;&gt;\
+&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;&lt;/span&gt;         --set values.cni.cniConfDir&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;/etc/cni/net.d&amp;#39;&lt;/span&gt; &lt;span class=&#34;se&#34;&gt;\
+&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;&lt;/span&gt;         --set components.cni.namespace&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;kube-system &amp;gt; generated-manifest.yaml
+
+kubectl apply -f generated-manifest.yaml
+
+istioctl verify-install -f ./generated-manifest.yaml
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 卸载istio&lt;/span&gt;
+istioctl manifest generate --set &lt;span class=&#34;nv&#34;&gt;profile&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;default &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; kubectl delete -f -
+&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;reference&#34;&gt;reference&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.cnblogs.com/charlieroro/p/12857372.html&#34;&gt;https://www.cnblogs.com/charlieroro/p/12857372.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://mp.weixin.qq.com/s/DrvBEVpMMt1pJBKPbyPcyQ&#34;&gt;https://mp.weixin.qq.com/s/DrvBEVpMMt1pJBKPbyPcyQ&lt;/a&gt;&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/virtualization/">virtualization</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/istio/">istio</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>Hugo Github Blog Deploy</title>
+                <link>https://blog.life6585.com/posts/hugo-github-blog-deploy/</link>
+                <guid isPermaLink="true">https://blog.life6585.com/posts/hugo-github-blog-deploy/</guid>
+                <pubDate>Tue, 16 Jun 2020 10:56:19 &#43;0800</pubDate>
+                
+                    <author>life85@126.comm (life6585)</author>
+                
+                <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</copyright>
+                
+                    <description>&lt;h2 id=&#34;方案&#34;&gt;方案&lt;/h2&gt;
+&lt;p&gt;github搭建个人博客&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;常用的生成器有hugo、hexo、jekyll,google对比了一下，hugo简单又快，就采用了hugo&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;github pages有几种类型: user pages、project pages等&lt;/p&gt;
+&lt;p&gt;user pages: repository name必须是{username}.github.com, 只存放生成的静态网站，需要有另外一个repository存放代码，不能指定pages的分支或者路径&lt;/p&gt;
+&lt;p&gt;project pages: repository name不是{username}.github.com就可以，代码和生成的静态网站可以存放在一个repository,生成的静态网站可以是一个目录或者一个分支(常用gh-page)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;deploy&lt;/p&gt;
+&lt;p&gt;脚本: huogo有样例，通过手动触发部署&lt;/p&gt;
+&lt;p&gt;ci: travis ci等，push 代码的时候，自动部署&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;result&lt;/p&gt;
+&lt;p&gt;先用project pages的分支方式部署成功，觉得有点复杂，换成了user pages,最终方案hugo+github user pages+travis ci&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;hugo&#34;&gt;hugo&lt;/h2&gt;
+&lt;h3 id=&#34;mac系统安装&#34;&gt;mac系统安装&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;brew install hugo
+hugo version
+&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;create-site&#34;&gt;create site&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;hugo new site  life6585
+&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; life6585
+git init
+&lt;span class=&#34;c1&#34;&gt;# 可以从https://themes.gohugo.io/选择主题&lt;/span&gt;
+git submodule add --depth &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; https://github.com/reuixiy/hugo-theme-meme.git themes/meme
+rm config.toml &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; cp themes/meme/config-examples/en/config.toml config.toml
+hugo new &lt;span class=&#34;s2&#34;&gt;&amp;#34;posts/hello-world.md&amp;#34;&lt;/span&gt;
+hugo new &lt;span class=&#34;s2&#34;&gt;&amp;#34;about/_index.md&amp;#34;&lt;/span&gt;
+hugo server -D
+&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;通过http://localhost:1313预览&lt;/p&gt;
+&lt;h2 id=&#34;github&#34;&gt;github&lt;/h2&gt;
+&lt;p&gt;github 创建 repository: life6585,用做代码仓库 ，事先加好github ssh-key&lt;/p&gt;
+&lt;p&gt;push to github&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;git add .
+git commit -m &lt;span class=&#34;s2&#34;&gt;&amp;#34;first commit&amp;#34;&lt;/span&gt;
+git remote add origin git@github.com:mylife6585/life6585.git
+git config  user.name &lt;span class=&#34;s2&#34;&gt;&amp;#34;life6585&amp;#34;&lt;/span&gt;
+git config  user.email &lt;span class=&#34;s2&#34;&gt;&amp;#34;life85@126.com&amp;#34;&lt;/span&gt;
+git push --set-upstream origin master
+&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;github 创建 repo: mylife6585.github.com,用做网站仓库&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;public&amp;#34;&lt;/span&gt; &amp;gt;&amp;gt; .gitignore
+git submodule add  git@github.com:mylife6585/mylife6585.github.com.git public
+&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;deploy&#34;&gt;deploy&lt;/h2&gt;
+&lt;h3 id=&#34;1-script&#34;&gt;1. script&lt;/h3&gt;
+&lt;p&gt;可以通过脚本手动推送网站到github&lt;/p&gt;
+&lt;p&gt;增加deploy.sh&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#!/bin/sh
+&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# If a command fails then the deploy stops&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;set&lt;/span&gt; -e
+
+&lt;span class=&#34;nb&#34;&gt;printf&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;\033[0;32mDeploying updates to GitHub...\033[0m\n&amp;#34;&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;# Build the project.&lt;/span&gt;
+hugo &lt;span class=&#34;c1&#34;&gt;# if using a theme, replace with `hugo -t &amp;lt;YOURTHEME&amp;gt;`&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;# Go To Public folder&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; public
+
+&lt;span class=&#34;c1&#34;&gt;# Add changes to git.&lt;/span&gt;
+git add .
+
+&lt;span class=&#34;c1&#34;&gt;# Commit changes.&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;msg&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;rebuilding site &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;date&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt; -n &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$*&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;then&lt;/span&gt;
+	&lt;span class=&#34;nv&#34;&gt;msg&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$*&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;fi&lt;/span&gt;
+git commit -m &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$msg&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;# Push source and build repos.&lt;/span&gt;
+git push origin master
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;2-travis-ci&#34;&gt;2. travis ci&lt;/h3&gt;
+&lt;p&gt;也可以通过travis ci自动部署&lt;/p&gt;
+&lt;p&gt;github增加personal access tokens , 通过github账号登陆&lt;a href=&#34;https://travis-ci.org&#34;&gt;travis ci&lt;/a&gt; , 管理repository，并添加$GITHUB_TOKEN 环境变量&lt;/p&gt;
+&lt;p&gt;代码仓库life6585增加.traivs.yml&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span class=&#34;k&#34;&gt;language&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;go&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;git&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;depth&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;install&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;- wget&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;https&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;//github.com/gohugoio/hugo/releases/download/v0&lt;span class=&#34;m&#34;&gt;.72.0&lt;/span&gt;/hugo_0&lt;span class=&#34;m&#34;&gt;.72&lt;/span&gt;.0_Linux-64bit.deb&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;- sudo&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;dpkg&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;-i&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;hugo&lt;span class=&#34;cp&#34;&gt;*.deb&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;script&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;- hugo&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;deploy&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;provider&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;pages&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;skip_cleanup&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;kc&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;local_dir&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;public&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;github_token&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;$GITHUB_TOKEN&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;on&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;branch&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;master&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;repo&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;mylife6585/mylife6585.github.com&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;target_branch&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;master&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;email&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;deploy@travis-ci.org&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;deployment-bot&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;README.md 增加traivs ci build status&lt;a href=&#34;https://travis-ci.org/mylife6585/life6585&#34;&gt;&lt;img src=&#34;https://travis-ci.org/mylife6585/life6585.svg?branch=master&#34; alt=&#34;Build Status&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;reference&#34;&gt;reference&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://zyfdegh.github.io/post/201705-how-i-setup-hugo/&#34;&gt;https://zyfdegh.github.io/post/201705-how-i-setup-hugo/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://themes.gohugo.io/hugo-theme-meme/&#34;&gt;https://themes.gohugo.io/hugo-theme-meme/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://gohugo.io/hosting-and-deployment/hosting-on-github/&#34;&gt;https://gohugo.io/hosting-and-deployment/hosting-on-github/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://mogeko.me/2018/018/&#34;&gt;https://mogeko.me/2018/018/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://gohugo.io/hosting-and-deployment/hosting-on-github/&#34;&gt;https://gohugo.io/hosting-and-deployment/hosting-on-github/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://zhuanlan.zhihu.com/p/37752930&#34;&gt;https://zhuanlan.zhihu.com/p/37752930&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://dev.to/zaracooper/create-your-developer-portfolio-using-hugo-and-github-pages-35en&#34;&gt;https://dev.to/zaracooper/create-your-developer-portfolio-using-hugo-and-github-pages-35en&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://medium.com/swlh/hosting-a-hugo-blog-on-github-pages-with-travis-ci-e74a1d686f10&#34;&gt;https://medium.com/swlh/hosting-a-hugo-blog-on-github-pages-with-travis-ci-e74a1d686f10&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://mogeko.me/2018/028/&#34;&gt;https://mogeko.me/2018/028/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://zyfdegh.github.io/post/201705-how-i-setup-hugo/&#34;&gt;https://zyfdegh.github.io/post/201705-how-i-setup-hugo/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.ruanyifeng.com/blog/2017/12/travis_ci_tutorial.html&#34;&gt;http://www.ruanyifeng.com/blog/2017/12/travis_ci_tutorial.html&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;problem&#34;&gt;problem&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;github project pages和user page的区别&lt;/p&gt;
+&lt;p&gt;user pages的repository name 特殊，为{username}.github.com,并且github pages不能设置路径或者branch&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;hugo文章不显示&lt;/p&gt;
+&lt;p&gt;去掉文章中的draft&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;博客更新之后,github pages的custom domain失效&lt;/p&gt;
+&lt;p&gt;增加static/CNAME文件，内容为自己的custom domain, &lt;a href=&#34;https://gohugo.io/hosting-and-deployment/hosting-on-github/&#34;&gt;参考官网&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/categories/application/">application</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/hugo/">hugo</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/github/">github</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://blog.life6585.com/tags/travis/">travis</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+    </channel>
+</rss>
